@@ -11,6 +11,14 @@ const typeDefs = `
         GRAPHIC
     }
 
+    type User {
+        githubLogin: ID!
+        name: String
+        avatar: String
+        postedPhotos: [Photo!]!
+        inPhotos: [Photo!]!
+    }
+
     type Photo {
         id: ID!
         url: String!
@@ -18,26 +26,20 @@ const typeDefs = `
         description: String
         category: PhotoCategory!
         postedBy: User!
+        taggedUsers: [User!]!
     }
-    
+
     input PostPhotoInput {
         name: String!
         category: PhotoCategory=PORTRAIT
         description: String
     }
-    
-    type User {
-        githubLogin: ID!
-        name: String
-        avatar: String
-        postedPhotos: [Photo!]!
-    }
-    
+
     type Query {
         totalPhotos: Int!
         allPhotos: [Photo!]!
     }
-    
+
     type Mutation {
         postPhoto(input: PostPhotoInput!): Photo!
     }
@@ -54,7 +56,6 @@ var users = [
     { "githubLogin": "gPlake", "name": "Glen Plake" },
     { "githubLogin": "sSchmidt", "name": "Scot Schmidt" }
 ]
-
 var photos = [
     {
         "id": "1",
@@ -76,6 +77,12 @@ var photos = [
         "category": "LANDSCAPE",
         "githubUser": "sSchmidt"
     }
+]
+var tags = [
+    { "photoID": "1", "userID": "gPlake" },
+    { "photoID": "2", "userID": "sSchmidt" },
+    { "photoID": "3", "userID": "mHattrup" },
+    { "photoID": "4", "userID": "gPlake" },
 ]
 
 
@@ -107,13 +114,23 @@ const resolvers = {
         url: parent => `http://yoursite.com/img/${parent.id}.jpg`,
         postedBy: parent => {
             return users.find(u => u.githubLogin === parent.githubUser)
-        }
+        },
+        // 対象の写真以外の写真を除外し、フィルタリングされたリストを実際のUserオブジェクトの配列にマッピングする
+        taggedUsers: parent => tags
+            .filter(tag => tag.photoID === parent.id) // 対象の写真が関係しているタグの配列を返す
+            .map(tag => tag.userID) // タグの配列をユーザーIDの配列に変換する
+            .map(userID => users.find(u => u.githubLogin === userID)) // ユーザーIDの配列をユーザーオブジェクトの配列に変換する
     },
 
     User: {
         postedPhotos: parent => {
             return photos.filter(p => p.githubUser === parent.githubLogin)
-        }
+        },
+        // ユーザーごとにタグをフィルタリングし、ユーザータグを実際のPhotoオブジェクトの配列にマッピングする
+        inPhotos: parent => tags
+            .filter(tag => tag.userID === parent.id) // 対象のユーザーが関係しているタグの配列を返す
+            .map(tag => tag.photoID) // タグの配列を写真IDの配列に変換する
+            .map(photoID => photos.find(p => p.id === photoID)) // 写真IDの配列を写真オブジェクトの配列に変換する
     }
 }
 
