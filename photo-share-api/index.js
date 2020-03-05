@@ -1,8 +1,11 @@
 // appllo-serverモジュールを読み込む
 const { ApolloServer } = require(`apollo-server`)
+const { GraphQLScalarType } = require(`graphql`)
 
 // スキーマ（データ要件）
 const typeDefs = `
+    scalar DateTime
+    
     enum PhotoCategory {
         SELFIE
         PORTRAIT
@@ -27,6 +30,7 @@ const typeDefs = `
         category: PhotoCategory!
         postedBy: User!
         taggedUsers: [User!]!
+        created: DateTime!
     }
 
     input PostPhotoInput {
@@ -37,7 +41,7 @@ const typeDefs = `
 
     type Query {
         totalPhotos: Int!
-        allPhotos: [Photo!]!
+        allPhotos(after: DateTime): [Photo!]!
     }
 
     type Mutation {
@@ -62,20 +66,23 @@ var photos = [
         "name": "Dropping the Heart Chute",
         "description": "ああああ",
         "category": "ACTION",
-        "githubUser": "gPlake"
+        "githubUser": "gPlake",
+        "created": "3-28-1977"
     },
     {
         "id": "2",
         "name": "Enjoying the sunshine",
         "category": "SELFIE",
-        "githubUser": "sSchmidt"
+        "githubUser": "sSchmidt",
+        "created": "2-1-1985"
     },
     {
         "id": "3",
         "name": "Gunbarrel 25",
         "description": "いいいい",
         "category": "LANDSCAPE",
-        "githubUser": "sSchmidt"
+        "githubUser": "sSchmidt",
+        "created": "2018-04-15T19:09:57.308Z"
     }
 ]
 var tags = [
@@ -86,6 +93,13 @@ var tags = [
 ]
 
 
+
+// フィールドが日付の値を返すたびに、その値をISO形式の文字列としてシリアライズする
+const serialize = value => new Date(value).toISOString()
+// クエリとともに送られてくる文字列の値をパースする
+const parseValue = value => new Date(value)
+// クエリドキュメントに直接追加された日付の値を取得する
+const parseLiteral = ast => ast.value
 
 // リゾルバ（データ取得）
 const resolvers = {
@@ -101,7 +115,8 @@ const resolvers = {
             // 新しい写真を作成し、idを生成する
             var newPhoto = {
                 id: _id++,
-                ...args.input
+                ...args.input,
+                created: new Date()
             }
             photos.push(newPhoto)
 
@@ -131,7 +146,15 @@ const resolvers = {
             .filter(tag => tag.userID === parent.id) // 対象のユーザーが関係しているタグの配列を返す
             .map(tag => tag.photoID) // タグの配列を写真IDの配列に変換する
             .map(photoID => photos.find(p => p.id === photoID)) // 写真IDの配列を写真オブジェクトの配列に変換する
-    }
+    },
+
+    DateTime: new GraphQLScalarType({
+        name: `DateTime`,
+        description: `A valid date time value.`,
+        serialize: serialize,
+        parseValue: parseValue,
+        parseLiteral: parseLiteral
+    })
 }
 
 // サーバーのインスタンスを作成
