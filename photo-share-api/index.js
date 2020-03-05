@@ -17,12 +17,20 @@ const typeDefs = `
         name: String!
         description: String
         category: PhotoCategory!
+        postedBy: User!
     }
     
     input PostPhotoInput {
         name: String!
         category: PhotoCategory=PORTRAIT
         description: String
+    }
+    
+    type User {
+        githubLogin: ID!
+        name: String
+        avatar: String
+        postedPhotos: [Photo!]!
     }
     
     type Query {
@@ -37,7 +45,40 @@ const typeDefs = `
 
 // ユニークIDをインクリメントするための変数
 var _id = 0
-var photos = []
+// var photos = []
+
+
+// 一時的なサーバテストのためのサンプルデータ
+var users = [
+    { "githubLogin": "mHattrup", "name": "Mike Hattrup" },
+    { "githubLogin": "gPlake", "name": "Glen Plake" },
+    { "githubLogin": "sSchmidt", "name": "Scot Schmidt" }
+]
+
+var photos = [
+    {
+        "id": "1",
+        "name": "Dropping the Heart Chute",
+        "description": "ああああ",
+        "category": "ACTION",
+        "githubUser": "gPlake"
+    },
+    {
+        "id": "2",
+        "name": "Enjoying the sunshine",
+        "category": "SELFIE",
+        "githubUser": "sSchmidt"
+    },
+    {
+        "id": "3",
+        "name": "Gunbarrel 25",
+        "description": "いいいい",
+        "category": "LANDSCAPE",
+        "githubUser": "sSchmidt"
+    }
+]
+
+
 
 // リゾルバ（データ取得）
 const resolvers = {
@@ -62,9 +103,17 @@ const resolvers = {
         }
     },
 
-    // ルートに追加されたリゾルバ = トリビアルリゾルバ
     Photo: {
-        url: parent => `http://yoursite.com/img/${parent.id}.jpg`
+        url: parent => `http://yoursite.com/img/${parent.id}.jpg`,
+        postedBy: parent => {
+            return users.find(u => u.githubLogin === parent.githubUser)
+        }
+    },
+
+    User: {
+        postedPhotos: parent => {
+            return photos.filter(p => p.githubUser === parent.githubLogin)
+        }
     }
 }
 
