@@ -3,10 +3,25 @@ const { ApolloServer } = require(`apollo-server`)
 
 // スキーマ（データ要件）
 const typeDefs = `
+    enum PhotoCategory {
+        SELFIE
+        PORTRAIT
+        ACTION
+        LANDSCAPE
+        GRAPHIC
+    }
+
     type Photo {
         id: ID!
         url: String!
         name: String!
+        description: String
+        category: PhotoCategory!
+    }
+    
+    input PostPhotoInput {
+        name: String!
+        category: PhotoCategory=PORTRAIT
         description: String
     }
     
@@ -16,11 +31,11 @@ const typeDefs = `
     }
     
     type Mutation {
-        postPhoto(name: String! description: String): Photo!
+        postPhoto(input: PostPhotoInput!): Photo!
     }
 `
 
-// 1. ユニークIDをインクリメントするための変数
+// ユニークIDをインクリメントするための変数
 var _id = 0
 var photos = []
 
@@ -33,16 +48,16 @@ const resolvers = {
 
     // postPhotoミューテーションと対応するリゾルバ
     Mutation: {
-        // 引数：親オブジェクト（Mutation）への参照, GraphQL引数（name と description）
+        // 引数：親オブジェクト（Mutation）への参照, GraphQL引数
         postPhoto(parent, args) {
-            // 2. 新しい写真を作成し、idを生成する
+            // 新しい写真を作成し、idを生成する
             var newPhoto = {
                 id: _id++,
-                ...args
+                ...args.input
             }
             photos.push(newPhoto)
 
-            // 3. 新しい写真を返す
+            // 新しい写真を返す
             return newPhoto
         }
     },
