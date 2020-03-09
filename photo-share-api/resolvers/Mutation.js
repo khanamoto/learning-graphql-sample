@@ -1,3 +1,5 @@
+const { authorizeWithGithub } = require('../lib')
+
 // ユニークIDをインクリメントするための変数
 var _id = 0
 
@@ -14,6 +16,43 @@ module.exports = {
 
         // 新しい写真を返す
         return newPhoto
+    },
+
+    // GitHubからトークンとユーザーアカウントを取得するリゾルバ
+    async githubAuth(parent, { code }, { db }) {
+        // GitHubからデータを取得する
+        let {
+            message,
+            access_token,
+            avatar_url,
+            login,
+            name
+        } = await authorizeWithGithub({
+            client_id: "89b690f4ec0c4607071a",
+            client_secret: "51b5eca8c6415c0d1e39e7ea5fa29138ae49042d",
+            code
+        })
+
+        // メッセージがある場合は何らかのエラーが発生している
+        if (message) {
+            throw new Error(message)
+        }
+
+        // データを一つのオブジェクトにまとめる
+        let latestuserInfo = {
+            name,
+            githubLogin: login,
+            githubToken: access_token,
+            avatar: avatar_url
+        }
+
+        // 新しい情報をもとにレコードを追加したり更新する
+        const { ops:[user] } = await db
+            .collection('users')
+            .replaceOne({ githubLogin: login }, latestUserInfo, { upsert: true })
+
+        // ユーザーデータとトークンを返す
+        return { user, token: access_token }
     }
 }
 
