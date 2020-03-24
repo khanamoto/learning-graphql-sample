@@ -21,6 +21,7 @@ module.exports = {
     // GitHubからトークンとユーザーアカウントを取得するリゾルバ
     async githubAuth(parent, { code }, { db }) {
         // GitHubからデータを取得する
+        // オブジェクトにまとめる
         let {
             message,
             access_token,
@@ -28,8 +29,8 @@ module.exports = {
             login,
             name
         } = await authorizeWithGithub({
-            client_id: "89b690f4ec0c4607071a",
-            client_secret: "51b5eca8c6415c0d1e39e7ea5fa29138ae49042d",
+            client_id: process.env.CLIENT_ID,
+            client_secret: process.env.CLIENT_SECRET,
             code
         })
 
@@ -39,7 +40,7 @@ module.exports = {
         }
 
         // データを一つのオブジェクトにまとめる
-        let latestuserInfo = {
+        let latestUserInfo = {
             name,
             githubLogin: login,
             githubToken: access_token,
@@ -53,7 +54,7 @@ module.exports = {
 
         // ユーザーデータとトークンを返す
         return { user, token: access_token }
-    }
+    },
 }
 
 // サンプルデータ
