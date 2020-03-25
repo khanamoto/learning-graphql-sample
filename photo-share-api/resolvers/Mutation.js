@@ -4,15 +4,23 @@ const { authorizeWithGithub } = require('../lib')
 var _id = 0
 
 module.exports = {
-    // 引数：親オブジェクト（Mutation）への参照, GraphQL引数
-    postPhoto(parent, args) {
-        // 新しい写真を作成し、idを生成する
+    // 引数：親オブジェクト（Mutation）への参照, GraphQL引数, コンテキストからcurrentUserを取得
+    async postPhoto(parent, args, { db, currentUser }) {
+        // コンテキストにユーザーがいなければエラーを投げる
+        if (!currentUser) {
+            throw new Error('only an authorized user can post a photo')
+        }
+
+        // 現在のユーザーのIDとphotoを保存する
         var newPhoto = {
-            id: _id++,
             ...args.input,
+            userID: currentUser.githubLogin,
             created: new Date()
         }
-        photos.push(newPhoto)
+
+        // 新しいphotoを追加して、データベースが生成したIDを取得する
+        const { insertedIds } = await db.collection('photos').insert(newPhoto)
+        newPhoto.id = insertedIds[0]
 
         // 新しい写真を返す
         return newPhoto

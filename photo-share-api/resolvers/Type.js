@@ -9,10 +9,10 @@ const parseLiteral = ast => ast.value
 
 module.exports = {
     Photo: {
-        url: parent => `http://yoursite.com/img/${parent.id}.jpg`,
-        postedBy: parent => {
-            return users.find(u => u.githubLogin === parent.githubUser)
-        },
+        id: parent => parent.id || parent._id,
+        url: parent => `/img/photos/${parent._id}.jpg`,
+        postedBy: (parent, args, { db }) =>
+            db.collection('users').findOne({ githubLogin: parent.userID }),
 
         // 対象の写真以外の写真を除外し、フィルタリングされたリストを実際のUserオブジェクトの配列にマッピングする
         taggedUsers: parent => tags
