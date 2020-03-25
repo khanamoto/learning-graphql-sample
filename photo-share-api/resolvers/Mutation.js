@@ -1,4 +1,5 @@
 const { authorizeWithGithub } = require('../lib')
+const fetch = require('node-fetch')
 
 // ユニークIDをインクリメントするための変数
 var _id = 0
@@ -63,6 +64,36 @@ module.exports = {
         // ユーザーデータとトークンを返す
         return { user, token: access_token }
     },
+
+    addFakeUsers: async (root, { count }, { db }) => {
+        var randomUserApi = `https://randomuser.me/api/?results=${count}`
+
+        var { results } = await fetch(randomUserApi).then(res => res.json())
+
+        var users = results.map(r => ({
+            githubLogin: r.login.username,
+            name: `${r.name.first} ${r.name.last}`,
+            githubToken: r.login.sha1
+        }))
+
+        await db.collection('users').insert(users)
+
+        return users
+    },
+
+    // フェイクユーザーを認証するために使用するトークンを返すリゾルバ
+    async fakeUserAuth(parent, { githubLogin }, { db }) {
+        var user = await db.collection('users').findOne({ githubLogin })
+
+        if (!user) {
+            throw new Error(`Cannot find user with githubLogin "${githubLogin}"`)
+        }
+
+        return {
+            token: user.githubToken,
+            user
+        }
+    }
 }
 
 // サンプルデータ
