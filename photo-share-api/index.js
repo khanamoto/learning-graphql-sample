@@ -41,7 +41,7 @@ async function start() {
     app.get('/playground', expressPlayground({ endpoint: '/graphql' }))
 
     // 特定のポートでリッスンする
-    app.listen({ port: 3000 }, () =>
+    app.listen({ port: 4000 }, () =>
         console.log(`GraphQL Service running @ http://localhost:4000${server.graphqlPath}`)
     )
 }
