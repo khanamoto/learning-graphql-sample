@@ -1,17 +1,22 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import ApolloClient, { gql } from 'apollo-boost'
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+const client = new ApolloClient({ uri: 'http://localhost:4000/graphql' })
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+const query = gql`
+    {
+        totalUsers
+        totalPhotos
+    }
+`
+
+// クライアントを利用してクエリを送信する
+// client.query({ query })
+//     .then(({ data }) => console.log('data', data))
+//     .catch(console.log)
+
+// クエリを送信する前にキャッシュを確認し、
+console.log('cache', client.extract())
+// クエリが解決されたあとでもう一度キャッシュを見てみる
+client.query({ query })
+    .then(() => console.log('cache', client.extract()))
+    .catch(console.log)
