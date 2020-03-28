@@ -42,7 +42,7 @@ async function start() {
 
     // 特定のポートでリッスンする
     app.listen({ port: 3000 }, () =>
-        console.log(`GraphQL Service running @ http://localhost:3000${server.graphqlPath}`)
+        console.log(`GraphQL Service running @ http://localhost:4000${server.graphqlPath}`)
     )
 }
 
