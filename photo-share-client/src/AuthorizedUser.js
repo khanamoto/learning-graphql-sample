@@ -14,7 +14,6 @@ const GITHUB_AUTH_MUTATION = gql`
 const Me = ({ logout, requestCode, signingIn }) =>
     // ROOT_QUERYから現在のユーザーに課するデータを取得
     <Query query={ROOT_QUERY}>
-        {/*FIX: dataだと取得できるが、data.meはエラーになる  */}
         {({ loading, data }) => data.me ?
             <CurrentUser {...data.me} logout={logout} /> :
             loading ?
