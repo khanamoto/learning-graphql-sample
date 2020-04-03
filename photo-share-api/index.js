@@ -46,7 +46,7 @@ async function start() {
     server.installSubscriptionHandlers(httpServer)
 
     httpServer.listen({ port: 4000 }, () =>
-        console.log(`GraphQL Service running @ http://localhost:4000${server.graphqlPath}`)
+        console.log(`GraphQL Service running at localhost:4000${server.graphqlPath}`)
     )
 }
 
