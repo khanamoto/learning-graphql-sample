@@ -3,6 +3,7 @@ const express = require('express')
 const expressPlayground = require('graphql-playground-middleware-express').default
 const { readFileSync } = require('fs') // node.jsのモジュール
 const { MongoClient } = require('mongodb')
+const { createServer } = require('http')
 require('dotenv').config()
 
 // スキーマ（データ要件）
@@ -40,8 +41,11 @@ async function start() {
     app.get('/', (req, res) => res.end('Welcome to the PhotoShare API'))
     app.get('/playground', expressPlayground({ endpoint: '/graphql' }))
 
-    // 特定のポートでリッスンする
-    app.listen({ port: 4000 }, () =>
+    const httpServer = createServer(app)
+    // Apollo Server が WebSocket を使用したサブスクリプションをサポートするのに必要なハンドラを追加
+    server.installSubscriptionHandlers(httpServer)
+
+    httpServer.listen({ port: 4000 }, () =>
         console.log(`GraphQL Service running @ http://localhost:4000${server.graphqlPath}`)
     )
 }
