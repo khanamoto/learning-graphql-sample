@@ -6,14 +6,14 @@ var _id = 0
 
 module.exports = {
     // 引数：親オブジェクト（Mutation）への参照, GraphQL引数, コンテキストからcurrentUserを取得
-    async postPhoto(parent, args, { db, currentUser }) {
+    async postPhoto(root, args, { db, currentUser, pubsub }) {
         // コンテキストにユーザーがいなければエラーを投げる
         if (!currentUser) {
             throw new Error('only an authorized user can post a photo')
         }
 
         // 現在のユーザーのIDとphotoを保存する
-        var newPhoto = {
+        const newPhoto = {
             ...args.input,
             userID: currentUser.githubLogin,
             created: new Date()
@@ -22,6 +22,10 @@ module.exports = {
         // 新しいphotoを追加して、データベースが生成したIDを取得する
         const { insertedIds } = await db.collection('photos').insert(newPhoto)
         newPhoto.id = insertedIds[0]
+
+        // イベントをパブリッシュ。データをサブスクリプションリゾルバに送信する
+        // photo-added イベントを購読しているすべてのハンドラに、新しい写真の詳細を送信する
+        pubsub.publish('photo-added', { newPhoto })
 
         // 新しい写真を返す
         return newPhoto
