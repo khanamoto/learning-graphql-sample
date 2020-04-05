@@ -61,9 +61,11 @@ module.exports = {
         }
 
         // 新しい情報をもとにレコードを追加したり更新する
-        const { ops:[user] } = await db
+        const { ops:[user], result } = await db
             .collection('users')
             .replaceOne({ githubLogin: login }, latestUserInfo, { upsert: true })
+
+        result.upserted && pubsub.publish('user-added', { newUser: user })
 
         // ユーザーデータとトークンを返す
         return { user, token: access_token }
@@ -81,6 +83,14 @@ module.exports = {
         }))
 
         await db.collection('users').insert(users)
+
+        var newUsers = await db.collection('users')
+            .find()
+            .sort({ _id: -1 })
+            .limit(count)
+            .toArray()
+
+        newUsers.forEach(newUser => pubsub.publish('user-added', { newUser }))
 
         return users
     },
