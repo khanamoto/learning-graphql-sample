@@ -4,6 +4,7 @@ const expressPlayground = require('graphql-playground-middleware-express').defau
 const { readFileSync } = require('fs') // node.jsのモジュール
 const { MongoClient } = require('mongodb')
 const { createServer } = require('http')
+const path = require('path')
 require('dotenv').config()
 
 // スキーマ（データ要件）
@@ -42,6 +43,12 @@ async function start() {
     // ホームルートを作成する
     app.get('/', (req, res) => res.end('Welcome to the PhotoShare API'))
     app.get('/playground', expressPlayground({ endpoint: '/graphql' }))
+
+    // /img/photos へのHTTPリクエストに対して、 assets/photos 内の静的ファイルを提供する
+    app.use(
+        '/img/photos',
+        express.static(path.join(__dirname, 'assets', 'photos'))
+    )
 
     const httpServer = createServer(app)
     // Apollo Server が WebSocket を使用したサブスクリプションをサポートするのに必要なハンドラを追加

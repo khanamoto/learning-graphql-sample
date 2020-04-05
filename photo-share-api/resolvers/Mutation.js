@@ -1,5 +1,7 @@
 const { authorizeWithGithub } = require('../lib')
 const fetch = require('node-fetch')
+const { uploadStream } = require('../lib')
+const path = require('path')
 
 // ユニークIDをインクリメントするための変数
 var _id = 0
@@ -22,6 +24,10 @@ module.exports = {
         // 新しいphotoを追加して、データベースが生成したIDを取得する
         const { insertedIds } = await db.collection('photos').insert(newPhoto)
         newPhoto.id = insertedIds[0]
+
+        var toPath = path.join(__dirname, '..', 'assets', 'photos', `${newPhoto.id}.jpg`)
+        const { stream } = await args.input.file
+        await uploadStream(stream, toPath)
 
         // イベントをパブリッシュ。データをサブスクリプションリゾルバに送信する
         // photo-added イベントを購読しているすべてのハンドラに、新しい写真の詳細を送信する
