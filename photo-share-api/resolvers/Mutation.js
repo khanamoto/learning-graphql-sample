@@ -32,7 +32,7 @@ module.exports = {
     },
 
     // GitHubからトークンとユーザーアカウントを取得するリゾルバ
-    async githubAuth(parent, { code }, { db }) {
+    async githubAuth(parent, { code }, { db, pubsub }) {
         // GitHubからデータを取得する
         // オブジェクトにまとめる
         let {
@@ -71,7 +71,7 @@ module.exports = {
         return { user, token: access_token }
     },
 
-    addFakeUsers: async (root, { count }, { db }) => {
+    addFakeUsers: async (root, { count }, { db, pubsub }) => {
         var randomUserApi = `https://randomuser.me/api/?results=${count}`
 
         var { results } = await fetch(randomUserApi).then(res => res.json())
