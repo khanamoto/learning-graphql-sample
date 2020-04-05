@@ -33,7 +33,7 @@ const authLink = new ApolloLink((operation, forward) => {
     operation.setContext(context => ({
         headers: {
             ...context.headers,
-            authorization: localStorage.getitem('token')
+            authorization: localStorage.getItem('token')
         }
     }))
     return forward(operation)
