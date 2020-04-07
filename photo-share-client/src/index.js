@@ -4,7 +4,6 @@ import App from './App'
 import { ApolloProvider } from 'react-apollo'
 import {
     InMemoryCache,
-    HttpLink,
     ApolloLink,
     ApolloClient,
     split
@@ -12,6 +11,7 @@ import {
 import { WebSocketLink } from 'apollo-link-ws'
 import { getMainDefinition } from "apollo-utilities"
 import { persistCache } from "apollo-cache-persist";
+import { createUploadLink } from 'apollo-upload-client'
 
 const cache = new InMemoryCache()
 persistCache({
@@ -26,7 +26,7 @@ if (localStorage['apollo-cache-persist']) {
     cache.restore(cacheData)
 }
 
-const httpLink = new HttpLink({ uri: 'http://localhost:4000/graphql' })
+const httpLink = createUploadLink({ uri: 'http://localhost:4000/graphql' })
 
 const authLink = new ApolloLink((operation, forward) => {
     // 認可ヘッダーをオペレーションに追加する

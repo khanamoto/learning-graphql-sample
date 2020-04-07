@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { withRouter } from 'react-router-dom'
+import { withRouter, NavLink } from 'react-router-dom'
 import { Query, Mutation, withApollo } from 'react-apollo'
 import { gql } from 'apollo-boost'
 import { compose } from 'recompose'
@@ -32,6 +32,7 @@ const CurrentUser = ({ name, avatar, logout }) =>
         <img src={avatar} width={48} height={48} alt="" />
         <h1>{name}</h1>
         <button onClick={logout}>logout</button>
+        <NavLink to="/newPhoto">Post Photo</NavLink>
     </div>
 
 class AuthorizedUser extends Component {
@@ -65,6 +66,15 @@ class AuthorizedUser extends Component {
 
     render() {
         return (
+            // <Query query={ME_QUERY}>
+            //     {({ loading, data }) => data.me ?
+            //         <div>
+            //             <img src={data.me.avatar_url} width={48} height={48} alt="" />
+            //             <button onClick={this.logout}>logout</button>
+            //             <NavLink to="/newPhoto">Post Photo</NavLink>
+            //         </div> :
+            //     }
+            // </Query>
             <Mutation
                 mutation={GITHUB_AUTH_MUTATION}
                 update={this.authorizationComplete}
