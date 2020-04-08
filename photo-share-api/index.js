@@ -6,6 +6,7 @@ const { MongoClient } = require('mongodb')
 const { createServer } = require('http')
 const path = require('path')
 const depthLimit = require('graphql-depth-limit')
+const { createComplexityLimitRule } = require('graphql-validation-complexity')
 require('dotenv').config()
 
 // スキーマ（データ要件）
@@ -31,7 +32,13 @@ async function start() {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
-        validationRules: [depthLimit(5)],
+        validationRules: [
+            depthLimit(5),
+            // 最大複雑度を1000に制限
+            createComplexityLimitRule(1000, {
+                onCost: cost => console.log('query cost: ', cost)
+            })
+        ],
         context: async ({ req, connection }) => {
             const githubToken = req ? req.headers.authorization : connection.context.Authorization
             const currentUser = await db.collection('users').findOne({ githubToken })

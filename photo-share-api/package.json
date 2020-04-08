@@ -21,6 +21,7 @@
   },
   "devDependencies": {
     "graphql-depth-limit": "^1.1.0",
+    "graphql-validation-complexity": "^0.3.0",
     "node-fetch": "^2.6.0"
   }
 }
