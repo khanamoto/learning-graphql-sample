@@ -54,6 +54,8 @@ async function start() {
     // Apollo Server が WebSocket を使用したサブスクリプションをサポートするのに必要なハンドラを追加
     server.installSubscriptionHandlers(httpServer)
 
+    httpServer.timeout = 5000
+
     httpServer.listen({ port: 4000 }, () =>
         console.log(`GraphQL Service running at localhost:4000${server.graphqlPath}`)
     )
