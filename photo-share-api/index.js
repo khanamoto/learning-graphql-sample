@@ -5,6 +5,7 @@ const { readFileSync } = require('fs') // node.jsのモジュール
 const { MongoClient } = require('mongodb')
 const { createServer } = require('http')
 const path = require('path')
+const depthLimit = require('graphql-depth-limit')
 require('dotenv').config()
 
 // スキーマ（データ要件）
@@ -30,6 +31,7 @@ async function start() {
     const server = new ApolloServer({
         typeDefs,
         resolvers,
+        validationRules: [depthLimit(5)],
         context: async ({ req, connection }) => {
             const githubToken = req ? req.headers.authorization : connection.context.Authorization
             const currentUser = await db.collection('users').findOne({ githubToken })

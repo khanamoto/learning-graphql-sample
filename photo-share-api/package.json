@@ -20,6 +20,7 @@
     "nodemon": "^2.0.2"
   },
   "devDependencies": {
+    "graphql-depth-limit": "^1.1.0",
     "node-fetch": "^2.6.0"
   }
 }
